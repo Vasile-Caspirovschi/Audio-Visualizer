@@ -18,23 +18,23 @@ namespace Musializer.Models
 
         WasapiLoopbackCapture loopbackCapture;
 
-        private double[] inRaw;
-        private double[] inWin;
+        private float[] inRaw;
+        private float[] inWin;
         private Complex[] outRaw;
-        private double[] outLog;
-        private double[] outSmooth;
+        private float[] outLog;
+        private float[] outSmooth;
         private int frequencesCount;
 
-        public double[] OutSmooth { get => outSmooth; set => outSmooth = value; }
+        public float[] OutSmooth { get => outSmooth; set => outSmooth = value; }
         public int FrequenceCount { get => frequencesCount; set => frequencesCount = value; }
 
         public AudioProcessor()
         {
-            inRaw = new double[N];
-            inWin = new double[N];
+            inRaw = new float[N];
+            inWin = new float[N];
             outRaw = new Complex[N];
-            outLog = new double[N];
-            outSmooth = new double[N];
+            outLog = new float[N];
+            outSmooth = new float[N];
 
             loopbackCapture = new WasapiLoopbackCapture();
             loopbackCapture.WaveFormat = new WaveFormat(44100, 16, 2);
@@ -48,16 +48,16 @@ namespace Musializer.Models
             int frames = e.BytesRecorded;
 
             int elementsToMove = (N - frames);
-            double[] tempArray = new double[elementsToMove];
+            float[] tempArray = new float[elementsToMove];
             Array.Copy(inRaw, frames, inRaw, 0, elementsToMove);
             Array.Copy(tempArray, inRaw, elementsToMove);
 
             for (int i = 0; i < frames / 2; ++i)
             {
-                // converting the data to double samples 
+                // converting the data to float samples 
                 short sample = BitConverter.ToInt16(audioData, i * 2);
-                double sampledouble = sample / 32768f; //normalizing the values to [-1, 1]
-                inRaw[i] = sampledouble;
+                float samplefloat = sample / 32768f; //normalizing the values to [-1, 1]
+                inRaw[i] = samplefloat;
             }
         }
 
@@ -75,7 +75,7 @@ namespace Musializer.Models
 
             for (int i = 0; i < n/2; ++i)
             {
-                double t = (double)i / n;
+                float t = (float)i / n;
                 Complex v = Complex.Exp(Complex.ImaginaryOne * Math.PI * t * -2) * outRaw[i + n/2];
                 Complex e = outRaw[i];
                 outRaw[i] = e + v;
@@ -87,26 +87,26 @@ namespace Musializer.Models
         {
             for (int i = 0; i < N; i++)
             {
-                double t = (double)i / N;
-                double hann = 0.5f - 0.5f * Math.Cos(2 * Math.PI * t);
+                float t = (float)i / N;
+                float hann = 0.5f - 0.5f * MathF.Cos(2 * MathF.PI * t);
                 inWin[i] = inRaw[i] * hann;
             }
         }
 
         private void ComputeNormalizedLogarithmicAmplitudes()
         {
-            double step = 1.06f;
-            double lowf = 1.0f;
-            double maxAmp = 1.0;
+            float step = 1.06f;
+            float lowf = 1.0f;
+            float maxAmp = 1.0f;
 
-            for (double f = lowf; (int)f < N / 2; f = (double)Math.Ceiling(f * step))
+            for (float f = lowf; (int)f < N / 2; f = (float)Math.Ceiling(f * step))
             {
-                double f1 = (double)Math.Ceiling(f * step);
-                double a = 0.0f;
+                float f1 = (float)Math.Ceiling(f * step);
+                float a = 0.0f;
 
                 for (int q = (int)f; q < N / 2 && q < (int)f1; ++q)
                 {
-                    double b = Amp(outRaw[q]); 
+                    float b = Amp(outRaw[q]); 
                     if (b > a) a = b;
                 }
                 if (maxAmp < a)
@@ -120,18 +120,18 @@ namespace Musializer.Models
         
         private void SmoothAmplitudes(int smoothness)
         {
-            double dt = GetFrameTime();
+            float dt = GetFrameTime();
             for (int i = 0; i < frequencesCount; i++)
             {
                 outSmooth[i] += (outLog[i] - outSmooth[i]) * dt * smoothness;
             }
         }
 
-        private double Amp(Complex z)
+        private float Amp(Complex z)
         {
-            double a = z.Real;
-            double b = z.Imaginary;
-            return Math.Log(a*a + b*b);
+            float a = Convert.ToSingle(z.Real);
+            float b = Convert.ToSingle(z.Imaginary);
+            return MathF.Log(a*a + b*b);
         }
 
         public void Update()

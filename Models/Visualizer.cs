@@ -42,7 +42,7 @@ namespace Musializer.Models
             for (int i = 0; i < m; i++)
             {
                 float hue = (float)i / m;
-                float t = audioProcessor.OutSmooth[i];
+                float t = Convert.ToSingle(audioProcessor.OutSmooth[i]);
                 Color color = ColorFromHSV(hue * 360, saturation, value);
                 Vector2 center = new Vector2(){ X = i * cellWidth + cellWidth / 2, Y = h - h * 2 / 3 * t };
                 float radius = cellWidth * 5 * MathF.Sqrt(t);
@@ -63,8 +63,8 @@ namespace Musializer.Models
 
             for (int i = 0; i < m; ++i)
             {
-                float start = audioProcessor.OutSmear[i];
-                float end = audioProcessor.OutSmooth[i];
+                float start = Convert.ToSingle(audioProcessor.OutSmooth[i]);
+                float end = Convert.ToSingle(audioProcessor.OutSmooth[i]);
                 float hue = (float)i / m;
                 Color color = ColorFromHSV(hue * 360, saturation, value);
                 Vector2 startPos = new Vector2(){
@@ -108,7 +108,7 @@ namespace Musializer.Models
             for (int i = 0; i < m; ++i)
             {
                 float hue = (float)i / m;
-                float t = audioProcessor.OutSmooth[i];
+                float t = Convert.ToSingle(audioProcessor.OutSmooth[i]);
                 Color color = ColorFromHSV(hue * 360, saturation, value);
                 Vector2 startPos = new Vector2(){
                     X = i*cellWidth + cellWidth/2,
