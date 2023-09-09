@@ -51,38 +51,6 @@ namespace Musializer.Models
             }
         }
 
-        void LoadAndPlayDroppedMusic()
-        {
-            FilePathList droppedFiles = LoadDroppedFiles();
-            if (droppedFiles.count == 0)
-                return;
-            if (IsMusicReady(plugin.Music))
-            {
-                StopMusicStream(plugin.Music);
-                UnloadMusicStream(plugin.Music);
-            }
-            string filePath;
-            unsafe
-            {
-                IntPtr path = (IntPtr)droppedFiles.paths[0];
-                filePath = new string(Marshal.PtrToStringAuto(path));
-            }
-
-            plugin.Music = LoadMusicStream(filePath);
-            if (IsMusicReady(plugin.Music))
-            {
-                plugin.Error = false;
-                plugin.Volume = 0.2f;
-                SetMusicVolume(plugin.Music, plugin.Volume);
-                PlayMusicStream(plugin.Music);
-                AudioStreamProcessor audioProcessor = (IntPtr bufferData, int frames) =>
-                {
-                    Callback(bufferData, frames);
-                };
-                AttachAudioStreamProcessor(plugin.Music, )
-
-            }
-        }
         public void UpdatePlugin()
         {
 
