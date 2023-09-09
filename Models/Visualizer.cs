@@ -34,10 +34,13 @@ namespace Musializer.Models
             EndDrawing();
         }
 
+
+
         public void Dispose()
         {
             audioProcessor.Close();
         }
+
 
     }
 }
