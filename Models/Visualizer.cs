@@ -1,6 +1,5 @@
 ﻿using Raylib_cs;
 using System.Numerics;
-using System.Text;
 using static Raylib_cs.Raylib;
 
 namespace Musializer.Models
@@ -19,6 +18,15 @@ namespace Musializer.Models
         {
             BeginDrawing();
             ClearBackground(GetColor(0x101010FF));
+
+            int m = audioProcessor.FrequenceCount;
+            float cellWidth = (float)GetRenderWidth() / m;
+            float saturation = 0.8f;
+            float value = 0.8f;
+
+            DrawBars(m, cellWidth, saturation, value);
+            DrawCircleTrails(m, cellWidth, saturation, value);
+            DrawCricles(m, cellWidth, saturation, value);
             EndDrawing();
         }
 
@@ -37,14 +45,14 @@ namespace Musializer.Models
         void DrawCricles(int m, float cellWidth, float saturation, float value)
         {
             int h = GetRenderHeight();
-            Texture2D texture = new Texture2D(){ id = Rlgl.rlGetTextureIdDefault(), height = 1, width = 1, mipmaps = 1, format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
+            Texture2D texture = new Texture2D() { id = Rlgl.rlGetTextureIdDefault(), height = 1, width = 1, mipmaps = 1, format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
 
             for (int i = 0; i < m; i++)
             {
                 float hue = (float)i / m;
                 float t = Convert.ToSingle(audioProcessor.OutSmooth[i]);
                 Color color = ColorFromHSV(hue * 360, saturation, value);
-                Vector2 center = new Vector2(){ X = i * cellWidth + cellWidth / 2, Y = h - h * 2 / 3 * t };
+                Vector2 center = new Vector2() { X = i * cellWidth + cellWidth / 2, Y = h - h * 2 / 3 * t };
                 float radius = cellWidth * 5 * MathF.Sqrt(t);
                 Vector2 position = new Vector2()
                 {
@@ -59,7 +67,7 @@ namespace Musializer.Models
         void DrawCircleTrails(int m, float cellWidth, float saturation, float value)
         {
             float h = GetRenderHeight();
-            Texture2D texture = new Texture2D(){ id = Rlgl.rlGetTextureIdDefault(), height = 1, width = 1, mipmaps = 1, format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
+            Texture2D texture = new Texture2D() { id = Rlgl.rlGetTextureIdDefault(), height = 1, width = 1, mipmaps = 1, format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
 
             for (int i = 0; i < m; ++i)
             {
@@ -67,36 +75,41 @@ namespace Musializer.Models
                 float end = Convert.ToSingle(audioProcessor.OutSmooth[i]);
                 float hue = (float)i / m;
                 Color color = ColorFromHSV(hue * 360, saturation, value);
-                Vector2 startPos = new Vector2(){
-                    
-                      X = i*cellWidth + cellWidth/2,
-                      Y = h - h*2/3*start,
+                Vector2 startPos = new Vector2()
+                {
+
+                    X = i * cellWidth + cellWidth / 2,
+                    Y = h - h * 2 / 3 * start,
                 };
-                Vector2 endPos = new Vector2(){
-                     X = i*cellWidth + cellWidth/2,
-                     Y = h - h*2/3*end,
+                Vector2 endPos = new Vector2()
+                {
+                    X = i * cellWidth + cellWidth / 2,
+                    Y = h - h * 2 / 3 * end,
                 };
                 float radius = cellWidth * MathF.Sqrt(end);
                 Vector2 origin = new Vector2();
                 if (endPos.Y >= startPos.Y)
                 {
-                    Rectangle dest = new Rectangle(){
-	                    x = startPos.X - radius,
-	                    y = startPos.Y,
-	                    width = 2*radius,
-	                    height = endPos.Y - startPos.Y
+                    Rectangle dest = new Rectangle()
+                    {
+                        x = startPos.X - radius,
+                        y = startPos.Y,
+                        width = 2 * radius,
+                        height = endPos.Y - startPos.Y
                     };
-                    Rectangle source = new Rectangle(){ x = 0, y = 0, width = 1, height = 0.5f };
+                    Rectangle source = new Rectangle() { x = 0, y = 0, width = 1, height = 0.5f };
                     DrawTexturePro(texture, source, dest, origin, 0, color);
                 }
                 else
                 {
-                    Rectangle dest = new Rectangle() {
-                        x = endPos.X - radius, 
-                        y = endPos.Y, 
-                        width = 2*radius, 
-                        height = startPos.Y - endPos.Y};
-                    Rectangle source = new Rectangle() { x = 0, y = 0.5f, width = 1, height = 0.5f};
+                    Rectangle dest = new Rectangle()
+                    {
+                        x = endPos.X - radius,
+                        y = endPos.Y,
+                        width = 2 * radius,
+                        height = startPos.Y - endPos.Y
+                    };
+                    Rectangle source = new Rectangle() { x = 0, y = 0.5f, width = 1, height = 0.5f };
                     DrawTexturePro(texture, source, dest, origin, 0, color);
                 }
             }
@@ -110,14 +123,16 @@ namespace Musializer.Models
                 float hue = (float)i / m;
                 float t = Convert.ToSingle(audioProcessor.OutSmooth[i]);
                 Color color = ColorFromHSV(hue * 360, saturation, value);
-                Vector2 startPos = new Vector2(){
-                    X = i*cellWidth + cellWidth/2,
-                    Y = h - h*2/3*t,
-    };
-                Vector2 endPos = new Vector2(){
-                    X = i*cellWidth + cellWidth/2,
+                Vector2 startPos = new Vector2()
+                {
+                    X = i * cellWidth + cellWidth / 2,
+                    Y = h - h * 2 / 3 * t,
+                };
+                Vector2 endPos = new Vector2()
+                {
+                    X = i * cellWidth + cellWidth / 2,
                     Y = h,
-    };
+                };
                 float thickness = cellWidth / 1.5f * MathF.Sqrt(t);
                 DrawLineEx(startPos, endPos, thickness, color);
             }
