@@ -136,7 +136,10 @@ namespace Musializer.Models
 
         public void Update()
         {
-            
+            ApplyHannWindowing();
+            FFT(0, 1, 0, N);
+            ComputeNormalizedLogarithmicAmplitudes();
+            SmoothAmplitudes(smoothness);
         }
 
         public void Close()
