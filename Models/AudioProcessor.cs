@@ -18,11 +18,13 @@ namespace Musializer.Models
         private Complex[] outRaw;
         private float[] outLog;
         private float[] outSmooth;
+        private float[] outSmear;
         private uint channels = 2;
         private int frequenceCount;
 
         public float[] OutLog { get => outLog; set => outLog = value; }
         public float[] OutSmooth { get => outSmooth; set => outSmooth = value; }
+        public float[] OutSmear { get => outSmear ; set => outSmear = value; }
         public int FrequenceCount { get => frequenceCount; set => frequenceCount = value; }
 
         public AudioProcessor()
