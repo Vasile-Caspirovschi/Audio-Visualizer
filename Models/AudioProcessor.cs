@@ -18,7 +18,6 @@ namespace Musializer.Models
         private Complex[] outRaw;
         private float[] outLog;
         private float[] outSmooth;
-        private uint channels = 2;
         private int frequenceCount;
 
         public float[] OutLog { get => outLog; set => outLog = value; }
@@ -34,12 +33,12 @@ namespace Musializer.Models
             outSmooth = new float[N];
 
             loopbackCapture = new WasapiLoopbackCapture();
-            loopbackCapture.WaveFormat = new WaveFormat(44100, 16,2);
+            loopbackCapture.WaveFormat = new WaveFormat(44100, 16, 2);
             loopbackCapture.DataAvailable += AudioDataCallback;
             loopbackCapture.StartRecording();
         }
 
-        void AudioDataCallback(object sender, WaveInEventArgs a)
+        void AudioDataCallback(object sender, WaveInEventArgs e)
         {
             byte[] audioData = e.Buffer;
             int frames = e.BytesRecorded;
@@ -58,6 +57,12 @@ namespace Musializer.Models
             }
         }
 
+        public void FFT(int stride, int n)
+        {
+            if (n < 0) throw new Exception("Number of samples cannot be smaller than 0");
+            if (n == 1)
+                outRaw[0] = new Complex();
+        }
         public void Update()
         {
 
