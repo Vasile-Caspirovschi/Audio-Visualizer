@@ -16,50 +16,55 @@ namespace Musializer.Models
         private float[] outLog;
         private float[] outSmooth;
         private uint channels = 2;
-        private Plugin plugin;
-        
-        public AudioProcessor(Plugin plugin)
+        private int frequenceCount;
+        private WaveInEvent waveIn;
+
+        public float[] OutLog { get => outLog; set => outLog = value; }
+        public float[] OutSmooth { get => outSmooth; set => outSmooth = value; }
+        public int FrequenceCount { get => frequenceCount; set => frequenceCount = value; }
+
+        public AudioProcessor()
         {
-            this.plugin = plugin;
-            Raylib.InitAudioDevice();
             inRaw = new float[N];
             inWin = new float[N];
             outRaw = new Complex[N];
-            outLog = new float[N];
-            outSmooth = new float[N];
+            OutLog = new float[N];
+            OutSmooth = new float[N];
+
+            waveIn = new WaveInEvent();
+            waveIn.DeviceNumber = 0;
+            waveIn.WaveFormat = new WaveFormat(44100, 16, 2);
+            waveIn.DataAvailable += AudioDataCallback;
+            waveIn.StartRecording();
         }
 
-        struct Frame
+        void AudioDataCallback(object sender, WaveInEventArgs e)
         {
-            public float left;
-            public float right;
-        }
-
-        void Callback(IntPtr bufferData, int frames)
-        {
-            Frame fs = Marshal.PtrToStructure<Frame>(bufferData);
-            
+            byte[] audioData = e.Buffer;
+            int frames = e.BytesRecorded;
 
             int elementsToMove = (N - frames);
             float[] tempArray = new float[elementsToMove];
             Array.Copy(inRaw, frames, inRaw, 0, elementsToMove);
             Array.Copy(tempArray, inRaw, elementsToMove);
-
-            for (int i = 0; i < frames; ++i)
+            
+            for (int i = 0; i < frames / 2; ++i)
             {
-                inRaw[N - frames + i] = fs.left;
+                // converting the data to float samples 
+                short sample = BitConverter.ToInt16(audioData, i * 2);
+                float sampleFloat = sample / 32768f; //normalizing the values to [-1, 1]
+                inRaw[i] = sampleFloat;
             }
         }
 
-        public void UpdatePlugin()
+        public void Update()
         {
 
         }
 
-        public void ClosePlugin()
+        public void Close()
         {
-            StopMusicStream(plugin.Music);
-          
+           waveIn.StopRecording();     
         }
     }
 }

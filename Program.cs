@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using Musializer.Models;
+using Raylib_cs;
 
 namespace Musializer
 {
@@ -11,25 +12,19 @@ namespace Musializer
             Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
             Raylib.InitWindow(factor * 16, factor * 10, "Musializer");
             Raylib.SetTargetFPS(60);
+            Visualizer visualizer = new Visualizer();
 
             while (!Raylib.WindowShouldClose())
             {
-                Raylib.BeginDrawing();
-                Raylib.EndDrawing();
+                
                 if (Raylib.IsKeyPressed(KeyboardKey.KEY_M))
                     CAPTURE_MODE = !CAPTURE_MODE;
 
-                if (Raylib.IsFileDropped())
-                {
-
-                }
-
                 if (CAPTURE_MODE)
                 {
-
-                }
-                if (Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER))
-                    break;
+                    visualizer.Visualize();
+                }else
+                    visualizer.RenderStartScreen();
             }
 
             Raylib.CloseWindow();
