@@ -26,7 +26,7 @@ namespace Musializer
                 }else
                     visualizer.RenderStartScreen();
             }
-
+            visualizer.Dispose();
             Raylib.CloseWindow();
         }
     }

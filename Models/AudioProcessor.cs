@@ -4,6 +4,7 @@ using Raylib_cs;
 using System.Runtime.InteropServices;
 using static Raylib_cs.Raylib;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Musializer.Models
 {
@@ -17,8 +18,9 @@ namespace Musializer.Models
         private float[] outSmooth;
         private uint channels = 2;
         private int frequenceCount;
-        private WaveInEvent waveIn;
-
+        WasapiLoopbackCapture loopbackCapture;
+        WaveFileWriter waveFileWriter;
+        
         public float[] OutLog { get => outLog; set => outLog = value; }
         public float[] OutSmooth { get => outSmooth; set => outSmooth = value; }
         public int FrequenceCount { get => frequenceCount; set => frequenceCount = value; }
@@ -31,30 +33,34 @@ namespace Musializer.Models
             OutLog = new float[N];
             OutSmooth = new float[N];
 
-            waveIn = new WaveInEvent();
-            waveIn.DeviceNumber = 0;
-            waveIn.WaveFormat = new WaveFormat(44100, 16, 2);
-            waveIn.DataAvailable += AudioDataCallback;
-            waveIn.StartRecording();
+            var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
+            Directory.CreateDirectory(outputFolder);
+            var outputFilePath = Path.Combine(outputFolder, "recorded.wav");
+            loopbackCapture = new WasapiLoopbackCapture();
+            loopbackCapture.WaveFormat = new WaveFormat(44100, 16,2);
+            waveFileWriter = new WaveFileWriter(outputFilePath, loopbackCapture.WaveFormat);
+            loopbackCapture.DataAvailable += AudioDataCallback;
+            loopbackCapture.StartRecording();
         }
 
-        void AudioDataCallback(object sender, WaveInEventArgs e)
+        void AudioDataCallback(object sender, WaveInEventArgs a)
         {
-            byte[] audioData = e.Buffer;
-            int frames = e.BytesRecorded;
+            //byte[] audioData = e.Buffer;
+            //int frames = e.BytesRecorded;
 
-            int elementsToMove = (N - frames);
-            float[] tempArray = new float[elementsToMove];
-            Array.Copy(inRaw, frames, inRaw, 0, elementsToMove);
-            Array.Copy(tempArray, inRaw, elementsToMove);
-            
-            for (int i = 0; i < frames / 2; ++i)
-            {
-                // converting the data to float samples 
-                short sample = BitConverter.ToInt16(audioData, i * 2);
-                float sampleFloat = sample / 32768f; //normalizing the values to [-1, 1]
-                inRaw[i] = sampleFloat;
-            }
+            //int elementsToMove = (N - frames);
+            //float[] tempArray = new float[elementsToMove];
+            //Array.Copy(inRaw, frames, inRaw, 0, elementsToMove);
+            //Array.Copy(tempArray, inRaw, elementsToMove);
+
+            //for (int i = 0; i < frames / 2; ++i)
+            //{
+            //    // converting the data to float samples 
+            //    short sample = BitConverter.ToInt16(audioData, i * 2);
+            //    float sampleFloat = sample / 32768f; //normalizing the values to [-1, 1]
+            //    inRaw[i] = sampleFloat;
+            //}
+            waveFileWriter.Write(a.Buffer, 0, a.BytesRecorded);
         }
 
         public void Update()
@@ -64,7 +70,14 @@ namespace Musializer.Models
 
         public void Close()
         {
-           waveIn.StopRecording();     
+            //waveIn.StopRecording();
+            loopbackCapture.StopRecording();
+            loopbackCapture.RecordingStopped += (s, a) =>
+            {
+                waveFileWriter.Dispose();
+                waveFileWriter = null;
+                loopbackCapture.Dispose();
+            };
         }
     }
 }
