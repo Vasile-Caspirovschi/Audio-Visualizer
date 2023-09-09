@@ -18,7 +18,10 @@ namespace Musializer
             {
                 
                 if (Raylib.IsKeyPressed(KeyboardKey.KEY_M))
+                {
                     CAPTURE_MODE = !CAPTURE_MODE;
+                    visualizer.Init();
+                }
 
                 if (CAPTURE_MODE)
                 {

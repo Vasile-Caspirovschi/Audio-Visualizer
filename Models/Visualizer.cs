@@ -9,16 +9,15 @@ namespace Musializer.Models
         const int FONT_SIZE = 35;
         AudioProcessor audioProcessor;
 
-        public Visualizer()
+        public void Init()
         {
             audioProcessor = new AudioProcessor();
         }
-
         public void Visualize()
         {
+            //audioProcessor.Update();
             BeginDrawing();
             ClearBackground(GetColor(0x101010FF));
-
             int m = audioProcessor.FrequenceCount;
             float cellWidth = (float)GetRenderWidth() / m;
             float saturation = 0.8f;
