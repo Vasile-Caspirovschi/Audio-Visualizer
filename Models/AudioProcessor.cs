@@ -71,7 +71,7 @@ namespace Musializer.Models
             for (float f = lowf; (int)f < N; f = (float)Math.Ceiling(f * step))
             {
                 float f1 = (float)Math.Ceiling(f * step);
-                float a = 0.0f;
+                float a = Magnitude(fftData[(int)f]);
 
                 for (int q = (int)f; q < N / 2 && q < (int)f1; ++q)
                 {
