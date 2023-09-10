@@ -1,5 +1,4 @@
-﻿using CircularBuffer;
-using NAudio.Dsp;
+﻿using NAudio.Dsp;
 using NAudio.Wave;
 using static Raylib_cs.Raylib;
 
@@ -53,7 +52,6 @@ namespace Musializer.Models
             for (int i = 0; i < samples; i++)
             {
                 if (fftIndex >= N) fftIndex = 0;
-                Complex z = new Complex();
                 fftData[fftIndex].X = (float)(rawData.FloatBuffer[i] * FastFourierTransform.HannWindow(fftIndex, N));
                 fftData[fftIndex].Y = 0;
                 fftIndex++;

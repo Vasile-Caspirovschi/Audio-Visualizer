@@ -11,12 +11,12 @@ namespace Musializer
             int factor = 60;
             Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
             Raylib.InitWindow(factor * 16, factor * 10, "Musializer");
-            Visualizer visualizer = new Visualizer();
             Raylib.SetTargetFPS(60);
+            Visualizer visualizer = new Visualizer();
 
             while (!Raylib.WindowShouldClose())
             {
-
+                
                 if (Raylib.IsKeyPressed(KeyboardKey.KEY_M))
                 {
                     CAPTURE_MODE = !CAPTURE_MODE;
@@ -26,8 +26,7 @@ namespace Musializer
                 if (CAPTURE_MODE)
                 {
                     visualizer.Visualize();
-                }
-                else
+                }else
                     visualizer.RenderStartScreen();
             }
             visualizer.Dispose();
