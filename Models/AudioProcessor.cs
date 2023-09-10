@@ -65,7 +65,7 @@ namespace Musializer.Models
             float step = 1.06f;
             float lowf = 1.0f;
             float maxAmp = 1.0f;
-            float scaleFactor = 10000f;
+            float scaleFactor = N;
             frequencesCount = 0;
 
             for (float f = lowf; (int)f < N; f = (float)Math.Ceiling(f * step))
