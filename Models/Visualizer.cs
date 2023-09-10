@@ -7,15 +7,19 @@ namespace Musializer.Models
     public class Visualizer
     {
         const int FONT_SIZE = 35;
+
+        //this variable is responsible for visualization to not fall down bellow a specific minHeight
+        private float minHeight = 0;
         AudioProcessor audioProcessor;
 
         public void Init()
         {
             audioProcessor = new AudioProcessor();
+            //minHeight = GetRenderHeight() / 3;
         }
         public void Visualize()
         {
-            //audioProcessor.Update();
+            audioProcessor.Update();
             BeginDrawing();
             ClearBackground(GetColor(0x101010FF));
             int m = audioProcessor.FrequenceCount;
@@ -24,8 +28,8 @@ namespace Musializer.Models
             float value = 0.8f;
 
             DrawBars(m, cellWidth, saturation, value);
-            DrawCircleTrails(m, cellWidth, saturation, value);
-            DrawCricles(m, cellWidth, saturation, value);
+            //DrawCircleTrails(m, cellWidth, saturation, value);
+            //DrawCricles(m, cellWidth, saturation, value);
             EndDrawing();
         }
 
@@ -49,10 +53,10 @@ namespace Musializer.Models
             for (int i = 0; i < m; i++)
             {
                 float hue = (float)i / m;
-                float t = Convert.ToSingle(audioProcessor.OutSmooth[i]);
+                float t = Convert.ToSingle(audioProcessor.OutLog[i]);
                 Color color = ColorFromHSV(hue * 360, saturation, value);
-                Vector2 center = new Vector2() { X = i * cellWidth + cellWidth / 2, Y = h - h * 2 / 3 * t };
-                float radius = cellWidth * 5 * MathF.Sqrt(t);
+                Vector2 center = new Vector2() { X = i * cellWidth + cellWidth / 2, Y = h - h * 2 / 3 * t  };
+                float radius = cellWidth * 5 * MathF.Sqrt(t) ;
                 Vector2 position = new Vector2()
                 {
                     X = center.X - radius,
@@ -66,17 +70,17 @@ namespace Musializer.Models
         void DrawCircleTrails(int m, float cellWidth, float saturation, float value)
         {
             float h = GetRenderHeight();
+            minHeight = h - (h * 2 / 3) / 2;
             Texture2D texture = new Texture2D() { id = Rlgl.rlGetTextureIdDefault(), height = 1, width = 1, mipmaps = 1, format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
 
             for (int i = 0; i < m; ++i)
             {
-                float start = Convert.ToSingle(audioProcessor.OutSmooth[i]);
-                float end = Convert.ToSingle(audioProcessor.OutSmooth[i]);
+                float start = audioProcessor.OutLog[i];
+                float end = audioProcessor.OutLog[i];
                 float hue = (float)i / m;
                 Color color = ColorFromHSV(hue * 360, saturation, value);
                 Vector2 startPos = new Vector2()
                 {
-
                     X = i * cellWidth + cellWidth / 2,
                     Y = h - h * 2 / 3 * start,
                 };
@@ -92,9 +96,9 @@ namespace Musializer.Models
                     Rectangle dest = new Rectangle()
                     {
                         x = startPos.X - radius,
-                        y = startPos.Y,
+                        y = startPos.Y ,
                         width = 2 * radius,
-                        height = endPos.Y - startPos.Y
+                        height = endPos.Y - startPos.Y 
                     };
                     Rectangle source = new Rectangle() { x = 0, y = 0, width = 1, height = 0.5f };
                     DrawTexturePro(texture, source, dest, origin, 0, color);
@@ -104,9 +108,9 @@ namespace Musializer.Models
                     Rectangle dest = new Rectangle()
                     {
                         x = endPos.X - radius,
-                        y = endPos.Y,
+                        y = endPos.Y ,
                         width = 2 * radius,
-                        height = startPos.Y - endPos.Y
+                        height = startPos.Y - endPos.Y 
                     };
                     Rectangle source = new Rectangle() { x = 0, y = 0.5f, width = 1, height = 0.5f };
                     DrawTexturePro(texture, source, dest, origin, 0, color);
@@ -120,12 +124,12 @@ namespace Musializer.Models
             for (int i = 0; i < m; ++i)
             {
                 float hue = (float)i / m;
-                float t = Convert.ToSingle(audioProcessor.OutSmooth[i]);
+                float t = audioProcessor.OutLog[i];
                 Color color = ColorFromHSV(hue * 360, saturation, value);
                 Vector2 startPos = new Vector2()
                 {
                     X = i * cellWidth + cellWidth / 2,
-                    Y = h - h * 2 / 3 * t,
+                    Y = h - h * 2/3 * t,
                 };
                 Vector2 endPos = new Vector2()
                 {
