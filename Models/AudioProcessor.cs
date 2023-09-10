@@ -10,7 +10,7 @@ namespace Musializer.Models
 
         //this value provides a nice result 
         private int smoothness = 8;
-
+        private int smearness = 6;
         WasapiLoopbackCapture loopbackCapture;
 
         private WaveBuffer rawData;
@@ -19,18 +19,22 @@ namespace Musializer.Models
         private int fftIndex;
         private float[] outLog;
         private float[] outSmooth;
+        private float[] outSmear;
         private int frequencesCount;
 
         public int FrequenceCount { get => frequencesCount; set => frequencesCount = value; }
-        public float[] OutLog { get => outLog; set => outLog = value; }
+        public float[] OutSmooth { get => outSmooth; set => outSmooth = value; }
+        public float[] OutSmear { get => outSmear; set => outSmear = value; }
 
         public AudioProcessor()
         {
             fftData = new Complex[N];
-            OutLog = new float[N];
+            outLog = new float[N];
             outSmooth = new float[N];
-            loopbackCapture = new WasapiLoopbackCapture();
+            outSmear = new float[N];
             rawData = new WaveBuffer(0);
+
+            loopbackCapture = new WasapiLoopbackCapture();
             //loopbackCapture.WaveFormat = new WaveFormat(44100, 16, 2);
             loopbackCapture.DataAvailable += AudioDataCallback;
             loopbackCapture.StartRecording();
@@ -61,7 +65,7 @@ namespace Musializer.Models
             float step = 1.06f;
             float lowf = 1.0f;
             float maxAmp = 1.0f;
-            float scaleFactor = 1000000f;
+            float scaleFactor = 10000f;
             frequencesCount = 0;
 
             for (float f = lowf; (int)f < N; f = (float)Math.Ceiling(f * step))
@@ -78,14 +82,14 @@ namespace Musializer.Models
                 if (maxAmp < a)
                     maxAmp = a ;
                 //scale the frequence by scaleFactor
-                OutLog[frequencesCount++] = a;
+                outLog[frequencesCount++] = a;
             }
 
             //normalize the values to [0, 1] range
             for (int i = 0; i < frequencesCount; i++)
             {
-                OutLog[i] /= maxAmp;
-                Console.WriteLine($"{OutLog[i]}\n");
+                outLog[i] /= maxAmp;
+                //Console.WriteLine($"{outLog[i]}\n");
             }
         }
 
@@ -95,14 +99,13 @@ namespace Musializer.Models
             return res;
         }
 
-
-
         private void SmoothAmplitudes(int smoothness)
         {
             float dt = GetFrameTime();
             for (int i = 0; i < frequencesCount; i++)
             {
-                outSmooth[i] += (OutLog[i] - outSmooth[i]) * dt * smoothness;
+                outSmooth[i] += (outLog[i] - OutSmooth[i]) * dt * smoothness;
+                outSmear[i] += (OutSmooth[i] - outSmear[i]) * dt * smearness;
             }
         }
 
@@ -110,7 +113,7 @@ namespace Musializer.Models
         {
             PerformFFTOnRawData();
             ComputeNormalizedLogarithmicAmplitudes();
-            //SmoothAmplitudes(smoothness);
+            SmoothAmplitudes(smoothness);
         }
 
         public void Close()

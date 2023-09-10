@@ -9,14 +9,22 @@ namespace Musializer.Models
         const int FONT_SIZE = 35;
 
         //this variable is responsible for visualization to not fall down bellow a specific minHeight
-        private float minHeight = 0;
         AudioProcessor audioProcessor;
+        Shader circle;
+        Shader smear;
+
+        public Visualizer()
+        {
+           
+            circle = LoadShader(null, "../../../Shaders/circle.fs");
+            smear = LoadShader(null, "../../../Shaders/smear.fs");
+        }
 
         public void Init()
         {
             audioProcessor = new AudioProcessor();
-            //minHeight = GetRenderHeight() / 3;
         }
+
         public void Visualize()
         {
             audioProcessor.Update();
@@ -28,8 +36,12 @@ namespace Musializer.Models
             float value = 0.8f;
 
             DrawBars(m, cellWidth, saturation, value);
-            //DrawCircleTrails(m, cellWidth, saturation, value);
-            //DrawCricles(m, cellWidth, saturation, value);
+            BeginShaderMode(smear);
+            DrawCircleTrails(m, cellWidth, saturation, value);
+            EndShaderMode();
+            BeginShaderMode(circle);
+            DrawCricles(m, cellWidth, saturation, value);
+            EndShaderMode();
             EndDrawing();
         }
 
@@ -53,7 +65,7 @@ namespace Musializer.Models
             for (int i = 0; i < m; i++)
             {
                 float hue = (float)i / m;
-                float t = Convert.ToSingle(audioProcessor.OutLog[i]);
+                float t = Convert.ToSingle(audioProcessor.OutSmooth[i]);
                 Color color = ColorFromHSV(hue * 360, saturation, value);
                 Vector2 center = new Vector2() { X = i * cellWidth + cellWidth / 2, Y = h - h * 2 / 3 * t  };
                 float radius = cellWidth * 5 * MathF.Sqrt(t) ;
@@ -64,19 +76,17 @@ namespace Musializer.Models
                 };
                 DrawTextureEx(texture, position, 0, 2 * radius, color);
             }
-
         }
 
         void DrawCircleTrails(int m, float cellWidth, float saturation, float value)
         {
             float h = GetRenderHeight();
-            minHeight = h - (h * 2 / 3) / 2;
             Texture2D texture = new Texture2D() { id = Rlgl.rlGetTextureIdDefault(), height = 1, width = 1, mipmaps = 1, format = PixelFormat.PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
 
             for (int i = 0; i < m; ++i)
             {
-                float start = audioProcessor.OutLog[i];
-                float end = audioProcessor.OutLog[i];
+                float start = audioProcessor.OutSmear[i];
+                float end = audioProcessor.OutSmooth[i];
                 float hue = (float)i / m;
                 Color color = ColorFromHSV(hue * 360, saturation, value);
                 Vector2 startPos = new Vector2()
@@ -124,7 +134,7 @@ namespace Musializer.Models
             for (int i = 0; i < m; ++i)
             {
                 float hue = (float)i / m;
-                float t = audioProcessor.OutLog[i];
+                float t = audioProcessor.OutSmooth[i];
                 Color color = ColorFromHSV(hue * 360, saturation, value);
                 Vector2 startPos = new Vector2()
                 {
@@ -143,7 +153,8 @@ namespace Musializer.Models
 
         public void Dispose()
         {
-            audioProcessor.Close();
+            if (audioProcessor is not null)
+                audioProcessor.Close();
         }
 
 
