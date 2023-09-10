@@ -47,11 +47,16 @@ namespace Musializer.Models
 
         private void PerformFFTOnRawData()
         {
-            int samples = rawData.FloatBuffer.Length / 8;
-
-            for (int i = 0; i < samples; i++)
+            int frames = rawData.FloatBuffer.Length / 8;
+            //if (frames > N)
+            //    frames = N;
+            for (int i = 0; i < frames; i++)
             {
-                if (fftIndex >= N) fftIndex = 0;
+                if (fftIndex >= N) 
+                {
+                    Array.Copy(fftData, fftIndex - frames, fftData, 0, frames);
+                    fftIndex = N - frames;
+                }
                 fftData[fftIndex].X = (float)(rawData.FloatBuffer[i] * FastFourierTransform.HannWindow(fftIndex, N));
                 fftData[fftIndex].Y = 0;
                 fftIndex++;
@@ -72,6 +77,7 @@ namespace Musializer.Models
             {
                 float f1 = (float)Math.Ceiling(f * step);
                 float a = Magnitude(fftData[(int)f]);
+                //float a = 0.0f;
 
                 for (int q = (int)f; q < N / 2 && q < (int)f1; ++q)
                 {
@@ -80,7 +86,7 @@ namespace Musializer.Models
                 }
                 a *= scaleFactor;
                 if (maxAmp < a)
-                    maxAmp = a ;
+                    maxAmp = a;
                 //scale the frequence by scaleFactor
                 outLog[frequencesCount++] = a;
             }
