@@ -27,7 +27,7 @@ namespace Musializer.Models
 
         public void Visualize()
         {
-            maxHeight = GetRenderWidth() * 2 / 3;
+            maxHeight = GetRenderWidth() * 1 / 2;
             audioProcessor.Update();
             BeginDrawing();
             ClearBackground(GetColor(0x101010FF));

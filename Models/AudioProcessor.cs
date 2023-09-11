@@ -9,7 +9,7 @@ namespace Musializer.Models
     {
         private const int N = 1 << 14;
 
-        //this values provides a nice result so i keept them
+        //this values provides a nice result so i kept them
         private int smoothness = 8;
         private int smearness = 6;
 
@@ -60,45 +60,11 @@ namespace Musializer.Models
             }
             //int m = (int)Math.Log(N, 2.0);
             //FastFourierTransform.FFT(true, m, fftData);
-            fft(0, 1, 0, N);
+            FFT(0, 1, 0, N);
         }
 
-        //static void FFT(ref float[] input, int stride, ref Complex[] output, int n)
-        //{
-        //    if (n <= 0)
-        //    {
-        //        throw new ArgumentException("n must be greater than 0");
-        //    }
-        //    if (n == 1)
-        //    {
-        //        output[0].X = input[0];
-        //        output[0].Y = 0;
-        //        return;
-        //    }
-        //    FFT(ref input, stride * 2, ref output, n / 2);
-        //    FFT(ref input, stride * 2, ref output, n / 2);
-
-        //    for (int k = 0; k < n / 2; ++k)
-        //    {
-        //        double t = (double)k / n;
-        //        float expA = (float)Math.Exp(0);
-        //        float cosB = (float)Math.Cos(-2 * Math.PI * t);
-        //        float sinB = (float)Math.Sin(-2 * Math.PI * t);
-        //        float realPart = expA * cosB;
-        //        float imagPart = expA * sinB;
-
-        //        Complex v =  new Complex();
-        //        v.X = (realPart * output[k + n / 2].X) - (imagPart * output[k + n / 2].Y);
-        //        v.Y = (realPart * output[k + n / 2].Y) + (imagPart * output[k + n / 2].X);
-
-        //        Complex e = output[k];
-        //        output[k].X = e.X + e.X;
-        //        output[k].Y = e.Y + e.Y;
-        //        output[k + n / 2].X = e.X - e.X;
-        //        output[k + n / 2].Y = e.Y - e.Y;
-        //    }
-        //}
-        public void fft(int indexIn, int stride, int indexOut, int n)
+        
+        public void FFT(int indexIn, int stride, int indexOut, int n)
         {
             if (n <= 0)
             {
@@ -109,8 +75,8 @@ namespace Musializer.Models
                 fftData[indexOut] = new Complex(inRaw[indexIn],0);
                 return;
             }
-            fft(indexIn, stride * 2, indexOut, n / 2);
-            fft(indexIn + stride, stride * 2, indexOut + n / 2, n / 2);
+            FFT(indexIn, stride * 2, indexOut, n / 2);
+            FFT(indexIn + stride, stride * 2, indexOut + n / 2, n / 2);
             for (int k = 0; k < n / 2; ++k)
             {
                 double t = (double)k / n;
@@ -150,12 +116,12 @@ namespace Musializer.Models
             //normalize the values to [0, 1] range and apply hann windowing
             for (int i = 0; i < frequencesCount; i++)
             {
-                outLog[i] /= maxAmp;
                 float t = (float)i / frequencesCount;
                 float hann = 0.5f - 0.5f * MathF.Cos(2 * MathF.PI * t);
                 outLog[i] = outLog[i] * hann;
                 //scalling to the power 
-                outLog[i] = MathF.Sqrt(MathF.Sqrt(outLog[i]) * 0.5f);
+                outLog[i] /= maxAmp;
+                outLog[i] = MathF.Sqrt(outLog[i]) * 0.7f;
             }
         }
 
