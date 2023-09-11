@@ -95,7 +95,7 @@ namespace Musializer.Models
                 float hann = 0.5f - 0.5f * MathF.Cos(2 * MathF.PI * t);
                 outLog[i] = outLog[i] * hann;
                 //scalling to the power 
-                outLog[i] = MathF.Sqrt(outLog[i]);
+                //outLog[i] = MathF.Sqrt(MathF.Sqrt(outLog[i]) * 0.5f);
             }
         }
 
