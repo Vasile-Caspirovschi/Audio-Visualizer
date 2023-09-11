@@ -7,7 +7,7 @@ namespace Musializer.Models
     public class Visualizer
     {
         const int FONT_SIZE = 35;
-        private float scaleFactor = 50.0f;
+        private float maxHeight;
         //this variable is responsible for visualization to not fall down bellow a specific minHeight
         AudioProcessor audioProcessor;
         Shader circle;
@@ -27,6 +27,7 @@ namespace Musializer.Models
 
         public void Visualize()
         {
+            maxHeight = GetRenderWidth() * 2 / 3;
             audioProcessor.Update();
             BeginDrawing();
             ClearBackground(GetColor(0x101010FF));
@@ -67,7 +68,7 @@ namespace Musializer.Models
                 float hue = (float)i / m;
                 float t = Convert.ToSingle(audioProcessor.OutSmooth[i]);
                 Color color = ColorFromHSV(hue * 360, saturation, value);
-                Vector2 center = new Vector2() { X = i * cellWidth + cellWidth / 2, Y = h - h * 2 / 3 * t  };
+                Vector2 center = new Vector2() { X = i * cellWidth + cellWidth / 2, Y = h - maxHeight * t  };
                 float radius = cellWidth * 5 * MathF.Sqrt(t) ;
                 Vector2 position = new Vector2()
                 {
@@ -92,12 +93,12 @@ namespace Musializer.Models
                 Vector2 startPos = new Vector2()
                 {
                     X = i * cellWidth + cellWidth / 2,
-                    Y = h - h * 2 / 3 * start,
+                    Y = h - maxHeight * start,
                 };
                 Vector2 endPos = new Vector2()
                 {
                     X = i * cellWidth + cellWidth / 2,
-                    Y = h - h * 2 / 3 * end,
+                    Y = h - maxHeight * end,
                 };
                 float radius = cellWidth * MathF.Sqrt(end);
                 Vector2 origin = new Vector2();
@@ -139,7 +140,7 @@ namespace Musializer.Models
                 Vector2 startPos = new Vector2()
                 {
                     X = i * cellWidth + cellWidth / 2,
-                    Y = h - h * 2/3 * t,
+                    Y = h - maxHeight * t,
                 };
                 Vector2 endPos = new Vector2()
                 {
