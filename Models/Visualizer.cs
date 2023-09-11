@@ -7,7 +7,7 @@ namespace Musializer.Models
     public class Visualizer
     {
         const int FONT_SIZE = 35;
-
+        private float scaleFactor = 50.0f;
         //this variable is responsible for visualization to not fall down bellow a specific minHeight
         AudioProcessor audioProcessor;
         Shader circle;

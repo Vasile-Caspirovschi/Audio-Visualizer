@@ -8,9 +8,10 @@ namespace Musializer.Models
     {
         private const int N = 1 << 14;
 
-        //this value provides a nice result 
+        //this values provides a nice result so i keept them
         private int smoothness = 8;
         private int smearness = 6;
+
         WasapiLoopbackCapture loopbackCapture;
 
         private WaveBuffer rawData;
@@ -48,16 +49,11 @@ namespace Musializer.Models
         private void PerformFFTOnRawData()
         {
             int frames = rawData.FloatBuffer.Length / 8;
-            //if (frames > N)
-            //    frames = N;
+
             for (int i = 0; i < frames; i++)
             {
-                if (fftIndex >= N) 
-                {
-                    Array.Copy(fftData, fftIndex - frames, fftData, 0, frames);
-                    fftIndex = N - frames;
-                }
-                fftData[fftIndex].X = (float)(rawData.FloatBuffer[i] * FastFourierTransform.HannWindow(fftIndex, N));
+                if (fftIndex >= N) fftIndex = 0;
+                fftData[fftIndex].X = (float)(rawData.FloatBuffer[i]);
                 fftData[fftIndex].Y = 0;
                 fftIndex++;
             }
@@ -73,11 +69,11 @@ namespace Musializer.Models
             float scaleFactor = N;
             frequencesCount = 0;
 
-            for (float f = lowf; (int)f < N; f = (float)Math.Ceiling(f * step))
+            for (float f = lowf; (int)f < N / 2; f = (float)Math.Ceiling(f * step))
             {
                 float f1 = (float)Math.Ceiling(f * step);
-                float a = Magnitude(fftData[(int)f]);
-                //float a = 0.0f;
+                //float a = Magnitude(fftData[(int)f]);
+                float a = 0.0f;
 
                 for (int q = (int)f; q < N / 2 && q < (int)f1; ++q)
                 {
@@ -91,11 +87,15 @@ namespace Musializer.Models
                 outLog[frequencesCount++] = a;
             }
 
-            //normalize the values to [0, 1] range
+            //normalize the values to [0, 1] range and apply hann windowing
             for (int i = 0; i < frequencesCount; i++)
             {
                 outLog[i] /= maxAmp;
-                //Console.WriteLine($"{outLog[i]}\n");
+                float t = (float)i / frequencesCount;
+                float hann = 0.5f - 0.5f * MathF.Cos(2 * MathF.PI * t);
+                outLog[i] = outLog[i] * hann;
+                //scalling to the power 
+                outLog[i] = MathF.Sqrt(outLog[i]);
             }
         }
 
