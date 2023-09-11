@@ -116,11 +116,11 @@ namespace Musializer.Models
             //normalize the values to [0, 1] range and apply hann windowing
             for (int i = 0; i < frequencesCount; i++)
             {
+                outLog[i] /= maxAmp;
                 float t = (float)i / frequencesCount;
                 float hann = 0.5f - 0.5f * MathF.Cos(2 * MathF.PI * t);
                 outLog[i] = outLog[i] * hann;
                 //scalling to the power 
-                outLog[i] /= maxAmp;
                 outLog[i] = MathF.Sqrt(outLog[i]) * 0.7f;
             }
         }
